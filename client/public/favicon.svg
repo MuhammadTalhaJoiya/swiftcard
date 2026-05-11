@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Shopping bag body -->
+  <path d="M14 24h36l-4 28H18L14 24z" fill="#6c63ff"/>
+  <!-- Bag handle -->
+  <path d="M22 24c0-5.5 4.5-10 10-10s10 4.5 10 10" stroke="#6c63ff" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <!-- Shine on bag -->
+  <path d="M20 32h24" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Price tag / star -->
+  <circle cx="32" cy="42" r="5" fill="#ffd700"/>
+  <text x="32" y="46" text-anchor="middle" font-size="7" fill="#6c63ff" font-family="Arial" font-weight="bold">$</text>
+</svg>
