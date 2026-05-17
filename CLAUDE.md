@@ -4,30 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SwiftCard is a MERN stack ecommerce application.
+SwiftCard is a MERN stack ecommerce application with JWT auth, an admin dashboard, cart/order management, and product catalog.
 
-- **Frontend**: React (Vite), located in `client/`
+- **Frontend**: React 18 + Vite, Tailwind CSS v4, located in `client/`
 - **Backend**: Node.js + Express REST API, located in `server/`
-- **Database**: MongoDB with Mongoose ODM
-- **Auth**: JWT-based authentication
+- **Database**: MongoDB with Mongoose ODM (hosted on MongoDB Atlas)
+- **Auth**: JWT-based (30-day tokens), stored in `localStorage`
+- **Deployed backend**: `https://swiftcard-production.up.railway.app/api`
 
 ## Commands
 
 ### Install dependencies
 ```bash
-# Root (if using workspaces or concurrently)
-npm install
-
-# Or separately
 cd client && npm install
 cd server && npm install
 ```
 
 ### Development
 ```bash
-# Run both client and server concurrently (from root)
-npm run dev
-
 # Client only (Vite dev server on http://localhost:5173)
 cd client && npm run dev
 
@@ -38,21 +32,17 @@ cd server && npm run dev
 ### Build
 ```bash
 cd client && npm run build
+cd client && npm run preview   # preview production build
 ```
 
 ### Lint
 ```bash
 cd client && npm run lint
-cd server && npm run lint
 ```
 
-### Tests
+### Seed database
 ```bash
-# Server tests
-cd server && npm test
-
-# Run a single test file
-cd server && npm test -- path/to/file.test.js
+cd server && node seed.js   # creates admin user + 12 products
 ```
 
 ## Architecture
@@ -60,40 +50,141 @@ cd server && npm test -- path/to/file.test.js
 ### Backend (`server/`)
 ```
 server/
-  index.js          # Entry point — connects to MongoDB, starts Express
-  config/           # DB connection, env config
-  models/           # Mongoose models (User, Product, Order, Cart)
-  routes/           # Express route definitions
-  controllers/      # Route handler logic (imported by routes)
-  middleware/        # Auth (verifyToken), error handler, etc.
-  utils/            # Helpers (e.g., generateToken)
+  server.js             # Entry point — mounts routes, error middleware
+  config/
+    db.js               # mongoose.connect(), exits on failure
+  models/
+    User.js             # name, email, password (hashed), role
+    Product.js          # name, description, price, category, stock, imageUrl, createdBy
+    Cart.js             # user (unique), items[], virtual totalPrice
+    Order.js            # user, orderItems[], shippingAddress, payment, status
+  controllers/
+    authController.js   # register, login, getUserProfile
+    productController.js# getProducts (filtered), getById, create, update, delete
+    cartController.js   # getCart, addToCart, removeFromCart, clearCart
+    orderController.js  # createOrder, getMyOrders, getOrderById, getAllOrders, updateOrderStatus
+  routes/
+    authRoutes.js       # /api/auth
+    productRoutes.js    # /api/products
+    cartRoutes.js       # /api/cart
+    orderRoutes.js      # /api/orders
+  middleware/
+    authMiddleware.js   # protect (JWT verify → req.user), adminOnly (role check)
+    errorMiddleware.js  # notFound (404), errorHandler (JSON error responses)
+  seed.js               # Database seeding script
 ```
 
-- Routes delegate to controllers; controllers use Mongoose models directly.
-- Auth middleware (`middleware/auth.js`) attaches `req.user` from the JWT payload.
-- A central error-handling middleware in `index.js` catches errors thrown from controllers.
-
-### Frontend (`client/`)
+### Frontend (`client/src/`)
 ```
-client/
-  src/
-    main.jsx        # React entry point
-    App.jsx         # Routes (React Router)
-    pages/          # Top-level page components
-    components/     # Reusable UI components
-    context/        # React Context providers (AuthContext, CartContext)
-    hooks/          # Custom hooks
-    services/       # Axios API call functions (one file per resource)
-    assets/         # Static assets
+main.jsx                # React entry point
+App.jsx                 # React Router v6 routes + layout
+pages/
+  HomePage.jsx          # Product grid, search bar, category filter
+  ProductDetailPage.jsx # Product detail, stock badge, add-to-cart
+  CartPage.jsx          # Cart items, qty stepper, order summary, checkout
+  LoginPage.jsx         # Email/password login form
+  RegisterPage.jsx      # Name/email/password registration form
+  OrdersPage.jsx        # User's order history list
+  AdminPage.jsx         # Admin dashboard: Products tab + Orders tab
+components/
+  Navbar.jsx            # Logo, nav links, cart badge, auth buttons
+  Footer.jsx            # Brand, links, copyright
+  ProductCard.jsx       # Grid card with add-to-cart
+  ProtectedRoute.jsx    # Auth guard; supports adminOnly prop
+context/
+  AuthContext.jsx       # user, login(), register(), logout() — persists to localStorage
+  CartContext.jsx       # Reducer-based local cart: items, itemCount, total
+services/
+  api.js                # Axios instance — adds Bearer token, handles 401 redirect
+  authService.js        # login, register
+  productService.js     # getAll (with filters), getById, create, update, remove
+  cartService.js        # get, addItem, removeItem, clear
+  orderService.js       # getMyOrders, getById, create, getAll, updateStatus
 ```
 
-- All API calls go through `services/` using Axios with a configured base URL pointing to the Express server.
-- `AuthContext` stores the JWT and user info; token is persisted in `localStorage`.
-- `CartContext` manages cart state (may be synced to backend for logged-in users).
+## API Routes
+
+### Auth (`/api/auth`)
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/register` | public | Register new user |
+| POST | `/login` | public | Login, returns JWT |
+| GET | `/profile` | protect | Get current user profile |
+
+### Products (`/api/products`)
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/` | public | List all; `?name=` `?category=` filters |
+| GET | `/:id` | public | Get product by ID |
+| POST | `/` | protect + adminOnly | Create product |
+| PUT | `/:id` | protect + adminOnly | Update product |
+| DELETE | `/:id` | protect + adminOnly | Delete product |
+
+### Cart (`/api/cart`)
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/` | protect | Get user's cart |
+| POST | `/` | protect | Add item `{ productId, qty }` |
+| DELETE | `/` | protect | Clear entire cart |
+| DELETE | `/:productId` | protect | Remove single item |
+
+### Orders (`/api/orders`)
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/` | protect | Create order |
+| GET | `/myorders` | protect | User's own orders |
+| GET | `/` | protect + adminOnly | All orders |
+| GET | `/:id` | protect | Order by ID (owner or admin) |
+| PUT | `/:id/status` | protect + adminOnly | Update status `{ status }` |
+
+## Models
+
+### User
+- `name` String, `email` String (unique), `password` String (bcrypt, min 6), `role` enum['user','admin']
+- Pre-save: hashes password; method: `matchPassword(plain)`
+
+### Product
+- `name`, `description`, `category`, `imageUrl` Strings
+- `price` Number (min 0), `stock` Number (min 0, default 0)
+- `createdBy` → ref User
+
+### Cart
+- `user` → ref User (unique), `items[]` → `{ product, qty, price }`
+- Virtual: `totalPrice` = sum(item.price × item.qty)
+
+### Order
+- `user` → ref User, `orderItems[]` → `{ product, name, imageUrl, price, qty }`
+- `shippingAddress` → `{ address, city, postalCode, country }`
+- `paymentMethod` String, `itemsPrice`, `shippingPrice`, `taxPrice`, `totalPrice` Numbers
+- `status` enum['pending','processing','shipped','delivered','cancelled'] (default: 'pending')
+- `isPaid` Boolean, `paidAt` Date, `isDelivered` Boolean, `deliveredAt` Date
+- Admin setting status to 'delivered' auto-sets `isDelivered=true` and `deliveredAt`
+
+## Environment Variables
+
+### Server (`server/.env`)
+```
+PORT=5000
+MONGO_URI=           # MongoDB Atlas connection string
+JWT_SECRET=          # Long random secret
+NODE_ENV=development
+CLIENT_ORIGIN=http://localhost:5173
+```
+
+### Client (`client/.env`)
+```
+VITE_API_URL=        # Backend base URL (e.g. http://localhost:5000/api)
+```
 
 ## Key Conventions
 
-- **Environment variables**: Server reads from `server/.env` (`MONGO_URI`, `JWT_SECRET`, `PORT`). Client reads from `client/.env` (`VITE_API_URL`).
-- **API prefix**: All backend routes are prefixed with `/api` (e.g., `/api/products`, `/api/auth`, `/api/orders`).
-- **Async handlers**: Use `async/await` with try/catch in controllers; pass errors to `next(err)`.
-- **Mongoose models**: Use `_id` (ObjectId) as the primary key — map to `id` on the frontend when needed.
+- **Entry point**: `server/server.js` (not `index.js`)
+- **Auth middleware**: `protect` → attaches `req.user`; `adminOnly` → checks `req.user.role === 'admin'`
+- **Error handling**: Controllers use `async/await` + `try/catch`, pass to `next(err)`; `errorMiddleware.js` returns JSON with stack in dev only
+- **API prefix**: All routes at `/api/...`
+- **Axios interceptor**: `services/api.js` auto-attaches JWT from localStorage; on 401, clears auth and redirects to `/login`
+- **Cart sync**: CartContext is local-only (reducer); CartPage syncs to server immediately before order creation
+- **Shipping logic**: Free if subtotal > $100, else $10 flat; tax is 15% of subtotal (calculated client-side in CartPage)
+- **Admin check**: `ProtectedRoute` with `adminOnly` prop redirects non-admins to `/`; Navbar shows Admin link only for `role === 'admin'`
+- **Vite proxy**: `/api` → `http://localhost:5000` in dev (no CORS issues locally)
+- **Mongoose IDs**: Use `_id` (ObjectId); Admin order table trims to last 8 chars for display
