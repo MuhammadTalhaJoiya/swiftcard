@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SwiftCard is a MERN stack ecommerce application with JWT auth, an admin dashboard, cart/order management, and product catalog.
+SwiftCard is a MERN stack ecommerce application with JWT auth, an admin dashboard, cart/order management, product catalog, analytics, and AI-powered features.
 
-- **Frontend**: React 18 + Vite, Tailwind CSS v4, located in `client/`
-- **Backend**: Node.js + Express REST API, located in `server/`
+- **Frontend**: React 18 + Vite, Tailwind CSS v4, Recharts, located in `client/`
+- **Backend**: Node.js + Express REST API, located in `server/` (deps: express, mongoose, jsonwebtoken, bcryptjs, cors, dotenv, openai, axios, multer)
 - **Database**: MongoDB with Mongoose ODM (hosted on MongoDB Atlas)
 - **Auth**: JWT-based (30-day tokens), stored in `localStorage`
+- **AI**: Google Gemini API (`gemini-2.5-flash-lite`, OpenAI-compatible endpoint) — insights, chat, product description generation, invoice OCR
 - **Deployed backend**: `https://swiftcard-production.up.railway.app/api`
 
 ## Commands
@@ -20,13 +21,13 @@ cd client && npm install
 cd server && npm install
 ```
 
-### Development
-```bash
-# Client only (Vite dev server on http://localhost:5173)
-cd client && npm run dev
+### Development (Windows — use PowerShell, not Bash)
+```powershell
+# Start backend (Express on http://localhost:5000)
+Start-Process powershell -ArgumentList '-NoExit', '-Command', 'Set-Location C:\swiftcard\server; npm run dev'
 
-# Server only (Express on http://localhost:5000)
-cd server && npm run dev
+# Start frontend (Vite on http://localhost:5173)
+Start-Process powershell -ArgumentList '-NoExit', '-Command', 'Set-Location C:\swiftcard\client; npm run dev'
 ```
 
 ### Build
@@ -45,12 +46,16 @@ cd client && npm run lint
 cd server && node seed.js   # creates admin user + 12 products
 ```
 
+## Admin Credentials
+- **Email**: `admin@swiftcard.com`
+- **Password**: `admin123`
+
 ## Architecture
 
 ### Backend (`server/`)
 ```
 server/
-  server.js             # Entry point — mounts routes, error middleware
+  server.js             # Entry point — sets DNS to 8.8.8.8 (Railway fix), mounts routes, error middleware
   config/
     db.js               # mongoose.connect(), exits on failure
   models/
@@ -59,18 +64,23 @@ server/
     Cart.js             # user (unique), items[], virtual totalPrice
     Order.js            # user, orderItems[], shippingAddress, payment, status
   controllers/
-    authController.js   # register, login, getUserProfile
-    productController.js# getProducts (filtered), getById, create, update, delete
-    cartController.js   # getCart, addToCart, removeFromCart, clearCart
-    orderController.js  # createOrder, getMyOrders, getOrderById, getAllOrders, updateOrderStatus
+    authController.js       # register, login, getUserProfile
+    productController.js    # getProducts (filtered), getById, create, update, delete
+    cartController.js       # getCart, addToCart, removeFromCart, clearCart
+    orderController.js      # createOrder, getMyOrders, getOrderById, getAllOrders, updateOrderStatus
+    analyticsController.js  # getAnalytics — revenue, orders, top products, top customers (last 30 days)
+    aiController.js         # generateInsights, chat, generateDescription, invoiceOcr (all use Gemini API)
   routes/
     authRoutes.js       # /api/auth
     productRoutes.js    # /api/products
     cartRoutes.js       # /api/cart
     orderRoutes.js      # /api/orders
+    analyticsRoutes.js  # /api/analytics  (admin only)
+    aiRoutes.js         # /api/ai         (admin only)
   middleware/
     authMiddleware.js   # protect (JWT verify → req.user), adminOnly (role check)
     errorMiddleware.js  # notFound (404), errorHandler (JSON error responses)
+    upload.js           # multer — memoryStorage, 5MB limit, jpeg/jpg/png/pdf only
   seed.js               # Database seeding script
 ```
 
@@ -85,7 +95,7 @@ pages/
   LoginPage.jsx         # Email/password login form
   RegisterPage.jsx      # Name/email/password registration form
   OrdersPage.jsx        # User's order history list
-  AdminPage.jsx         # Admin dashboard: Products tab + Orders tab
+  AdminPage.jsx         # Admin dashboard: Products | Orders | Analytics | AI Tools tabs
 components/
   Navbar.jsx            # Logo, nav links, cart badge, auth buttons
   Footer.jsx            # Brand, links, copyright
@@ -100,6 +110,8 @@ services/
   productService.js     # getAll (with filters), getById, create, update, remove
   cartService.js        # get, addItem, removeItem, clear
   orderService.js       # getMyOrders, getById, create, getAll, updateStatus
+  analyticsService.js   # getMetrics(), getInsights(metrics)
+  aiService.js          # chat(message, history), generateDescription(name, features), invoiceOcr(formData)
 ```
 
 ## API Routes
@@ -137,6 +149,19 @@ services/
 | GET | `/:id` | protect | Order by ID (owner or admin) |
 | PUT | `/:id/status` | protect + adminOnly | Update status `{ status }` |
 
+### Analytics (`/api/analytics`)
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/` | protect + adminOnly | Revenue by day, orders by status, top products, top customers, summary |
+
+### AI (`/api/ai`)
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/insights` | protect + adminOnly | Generate bullet-point insights from analytics data |
+| POST | `/chat` | protect + adminOnly | Chat with store data (uses live DB context) |
+| POST | `/generate-description` | protect + adminOnly | Generate SEO product description + summary `{ name, features }` |
+| POST | `/invoice-ocr` | protect + adminOnly | Upload invoice image/PDF → extract fields via OCR + Gemini |
+
 ## Models
 
 ### User
@@ -165,15 +190,17 @@ services/
 ### Server (`server/.env`)
 ```
 PORT=5000
-MONGO_URI=           # MongoDB Atlas connection string
-JWT_SECRET=          # Long random secret
+MONGO_URI=              # MongoDB Atlas connection string
+JWT_SECRET=             # Long random secret
 NODE_ENV=development
 CLIENT_ORIGIN=http://localhost:5173
+GEMINI_API_KEY=         # Google Gemini API key — required for all AI features
+OCR_SPACE_API_KEY=      # Required for invoice OCR (ocr.space free tier available)
 ```
 
 ### Client (`client/.env`)
 ```
-VITE_API_URL=        # Backend base URL (e.g. http://localhost:5000/api)
+VITE_API_URL=http://localhost:5000/api   # Local dev — use this, not the Railway URL
 ```
 
 ## Key Conventions
@@ -188,3 +215,6 @@ VITE_API_URL=        # Backend base URL (e.g. http://localhost:5000/api)
 - **Admin check**: `ProtectedRoute` with `adminOnly` prop redirects non-admins to `/`; Navbar shows Admin link only for `role === 'admin'`
 - **Vite proxy**: `/api` → `http://localhost:5000` in dev (no CORS issues locally)
 - **Mongoose IDs**: Use `_id` (ObjectId); Admin order table trims to last 8 chars for display
+- **AI model**: All Gemini calls use `gemini-2.5-flash-lite` via OpenAI-compatible SDK (`baseURL: https://generativelanguage.googleapis.com/v1beta/openai/`), max_tokens 512–1024. Do not use `gemini-2.5-flash` (only 20 RPD free tier — exhausts fast) or `gemini-2.0-flash` (free tier limit is 0 for this project). `gemini-2.5-flash-lite` has 1,500 RPD on the free tier.
+- **File uploads**: `upload.js` (multer) stores in memory (no disk), 5MB max, image/jpeg + image/jpg + image/png + application/pdf only
+- **Windows dev**: Use PowerShell to start dev servers — Bash tool uses Linux paths and breaks on Windows `C:\` paths
