@@ -216,5 +216,7 @@ VITE_API_URL=http://localhost:5000/api   # Local dev — use this, not the Railw
 - **Vite proxy**: `/api` → `http://localhost:5000` in dev (no CORS issues locally)
 - **Mongoose IDs**: Use `_id` (ObjectId); Admin order table trims to last 8 chars for display
 - **AI model**: All Gemini calls use `gemini-2.5-flash-lite` via OpenAI-compatible SDK (`baseURL: https://generativelanguage.googleapis.com/v1beta/openai/`), max_tokens 512–1024. Do not use `gemini-2.5-flash` (only 20 RPD free tier — exhausts fast) or `gemini-2.0-flash` (free tier limit is 0 for this project). `gemini-2.5-flash-lite` has 1,500 RPD on the free tier.
+- **Chatbot tool calling**: `chat` uses an agentic loop (max 5 rounds) with 3 tools — `query_revenue_by_date_range`, `query_orders_by_date`, `query_top_products`. AI reads from the snapshot first; calls tools only for specific dates/ranges not already in the snapshot. Each chat message can trigger up to 2 Gemini API calls (initial + after tool result).
+- **Rate limit handling**: All AI endpoints use `withRetry` (1 retry, 2s delay) on 429. If retries exhausted, returns `429` with a human-readable message to the client.
 - **File uploads**: `upload.js` (multer) stores in memory (no disk), 5MB max, image/jpeg + image/jpg + image/png + application/pdf only
 - **Windows dev**: Use PowerShell to start dev servers — Bash tool uses Linux paths and breaks on Windows `C:\` paths
