@@ -56,7 +56,7 @@ cd server && node seed.js   # creates admin user + 12 products
 ### Backend (`server/`)
 ```
 server/
-  server.js             # Entry point — sets DNS to 8.8.8.8 (Railway fix), mounts routes, error middleware
+  server.js             # Entry point — sets DNS to 8.8.8.8 (Railway fix), mounts routes, error middleware; root GET / returns JSON health check
   config/
     db.js               # mongoose.connect(), exits on failure
   models/

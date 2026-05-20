@@ -25,7 +25,7 @@ app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 
-app.get('/', (req, res) => res.send('SwiftCart API is running'));
+app.get('/', (req, res) => res.json({ status: 'ok', name: 'SwiftCard API', version: '1.0.0' }));
 
 app.use(notFound);
 app.use(errorHandler);
