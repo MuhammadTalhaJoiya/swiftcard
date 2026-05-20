@@ -34,3 +34,5 @@ project-idea-*.md
 
 # Claude Code
 .claude/
+
+.vercel
