@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 SwiftCard is a MERN stack ecommerce application with JWT auth, an admin dashboard, cart/order management, product catalog, analytics, and AI-powered features.
 
 - **Frontend**: React 18 + Vite, Tailwind CSS v4, Recharts, located in `client/`
+- **Design system**: Amber/zinc palette (amber-500 accent, zinc-900 navbar/footer/admin sidebar), Inter font via Google Fonts. No indigo — replaced everywhere with amber. See `PRODUCT.md` for brand context.
 - **Backend**: Node.js + Express REST API, located in `server/` (deps: express, mongoose, jsonwebtoken, bcryptjs, cors, dotenv, openai, axios, multer)
 - **Database**: MongoDB with Mongoose ODM (hosted on MongoDB Atlas)
 - **Auth**: JWT-based (30-day tokens), stored in `localStorage`

@@ -16,17 +16,22 @@ const addToCart = async (req, res, next) => {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    let cart = await Cart.findOne({ user: req.user._id });
-    if (!cart) cart = new Cart({ user: req.user._id, items: [] });
+    // Update qty if item already exists in cart
+    let cart = await Cart.findOneAndUpdate(
+      { user: req.user._id, 'items.product': productId },
+      { $set: { 'items.$.qty': qty, 'items.$.price': product.price } },
+      { new: true }
+    );
 
-    const existingItem = cart.items.find((i) => i.product.toString() === productId);
-    if (existingItem) {
-      existingItem.qty = qty;
-    } else {
-      cart.items.push({ product: productId, qty, price: product.price });
+    if (!cart) {
+      // Item not in cart yet — push it, upsert creates cart atomically if missing
+      cart = await Cart.findOneAndUpdate(
+        { user: req.user._id },
+        { $push: { items: { product: productId, qty, price: product.price } } },
+        { new: true, upsert: true }
+      );
     }
 
-    await cart.save();
     res.json(await cart.populate('items.product', 'name imageUrl price stock'));
   } catch (err) {
     next(err);

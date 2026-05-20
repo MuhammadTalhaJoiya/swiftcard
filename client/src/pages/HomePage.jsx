@@ -3,7 +3,7 @@ import { productService } from '../services/productService'
 import ProductCard from '../components/ProductCard'
 
 function SkeletonCard() {
-  return <div className="bg-gray-100 rounded-xl h-72 animate-pulse" />
+  return <div className="bg-zinc-100 rounded-xl h-72 animate-pulse" />
 }
 
 export default function HomePage() {
@@ -42,12 +42,18 @@ export default function HomePage() {
   const isFiltering = search !== '' || category !== ''
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+      {/* Page header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">All Products</h1>
+        <p className="text-zinc-500 text-sm mt-1">Free shipping on orders over $100</p>
+      </div>
 
       {/* Search + category filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
           <input
@@ -55,7 +61,7 @@ export default function HomePage() {
             placeholder="Search products..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-zinc-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent placeholder:text-zinc-400"
           />
         </div>
 
@@ -63,7 +69,7 @@ export default function HomePage() {
           value={category}
           onChange={e => setCategory(e.target.value)}
           disabled={loading}
-          className="sm:w-48 px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50"
+          className="sm:w-48 px-4 py-2.5 text-sm text-zinc-700 border border-zinc-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:opacity-50"
         >
           <option value="">All Categories</option>
           {categories.map(cat => (
@@ -74,14 +80,15 @@ export default function HomePage() {
 
       {/* Status row */}
       {!loading && !error && (
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-gray-500">
-            {filtered.length} {filtered.length === 1 ? 'product' : 'products'}
-            {category && <> in <span className="font-medium text-gray-700">"{category}"</span></>}
-            {search && <> matching <span className="font-medium text-gray-700">"{search}"</span></>}
+        <div className="flex items-center justify-between mb-5">
+          <p className="text-sm text-zinc-500">
+            <span className="font-semibold text-zinc-700">{filtered.length}</span>{' '}
+            {filtered.length === 1 ? 'product' : 'products'}
+            {category && <> in <span className="font-medium text-zinc-700">"{category}"</span></>}
+            {search && <> matching <span className="font-medium text-zinc-700">"{search}"</span></>}
           </p>
           {isFiltering && (
-            <button onClick={clearFilters} className="text-sm text-indigo-600 hover:underline">
+            <button onClick={clearFilters} className="text-sm font-medium text-amber-600 hover:text-amber-500 transition-colors">
               Clear filters
             </button>
           )}
@@ -113,13 +120,13 @@ export default function HomePage() {
 
       {/* Empty state */}
       {!loading && !error && filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-          <svg className="h-12 w-12 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="flex flex-col items-center justify-center py-24 text-zinc-400">
+          <svg className="h-12 w-12 mb-4 text-zinc-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
-          <p className="text-lg font-medium">No products found</p>
+          <p className="text-lg font-semibold text-zinc-600">No products found</p>
           {isFiltering && (
-            <button onClick={clearFilters} className="mt-2 text-sm text-indigo-600 hover:underline">
+            <button onClick={clearFilters} className="mt-2 text-sm font-medium text-amber-600 hover:text-amber-500 transition-colors">
               Clear filters
             </button>
           )}

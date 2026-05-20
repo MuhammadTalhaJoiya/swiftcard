@@ -11,21 +11,21 @@ import {
 const EMPTY_FORM = { name: '', description: '', price: '', category: '', stock: '', imageUrl: '' }
 const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
 const STATUS_STYLES = {
-  pending:    'bg-gray-100 text-gray-600',
-  processing: 'bg-blue-100 text-blue-700',
-  shipped:    'bg-amber-100 text-amber-700',
-  delivered:  'bg-green-100 text-green-700',
-  cancelled:  'bg-red-100 text-red-600',
+  pending:    'bg-zinc-100 text-zinc-600',
+  processing: 'bg-blue-50 text-blue-700',
+  shipped:    'bg-amber-50 text-amber-700',
+  delivered:  'bg-emerald-50 text-emerald-700',
+  cancelled:  'bg-red-50 text-red-600',
 }
 
 // Wraps a single input/textarea child, injecting consistent Tailwind classes
 function Field({ label, className = '', children }) {
   return (
     <div className={className}>
-      <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-zinc-600 mb-1">{label}</label>
       {cloneElement(children, {
         className:
-          'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent',
+          'w-full border border-zinc-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent',
       })}
     </div>
   )
@@ -33,16 +33,16 @@ function Field({ label, className = '', children }) {
 
 // ── Sidebar item helper ──────────────────────────────────────────
 function SidebarItem({ label, section, activeSection, setActiveSection }) {
-  const icons = { products: '📦', orders: '📋', analytics: '📊', aitools: '🤖' }
   const isActive = activeSection === section
   return (
     <button
       onClick={() => setActiveSection(section)}
-      className={`w-full flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${
-        isActive ? 'bg-indigo-900 font-semibold' : 'hover:bg-indigo-600'
+      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+        isActive
+          ? 'bg-amber-500 text-white font-semibold'
+          : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
       }`}
     >
-      <span>{icons[section]}</span>
       {label}
     </button>
   )
@@ -50,13 +50,13 @@ function SidebarItem({ label, section, activeSection, setActiveSection }) {
 
 // ── Analytics Panel ──────────────────────────────────────────────
 const STATUS_COLORS = {
-  pending: '#6366f1',
+  pending: '#a1a1aa',
   processing: '#3b82f6',
   shipped: '#f59e0b',
   delivered: '#10b981',
   cancelled: '#ef4444',
 }
-const PIE_COLORS = ['#6366f1', '#3b82f6', '#f59e0b', '#10b981', '#ef4444']
+const PIE_COLORS = ['#f59e0b', '#3b82f6', '#10b981', '#a1a1aa', '#ef4444']
 
 function AnalyticsPanel() {
   const [metrics, setMetrics] = useState(null)
@@ -109,7 +109,7 @@ function AnalyticsPanel() {
         ].map((kpi) => (
           <div key={kpi.label} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
             <p className="text-xs text-gray-500 uppercase tracking-wide">{kpi.label}</p>
-            <p className="text-2xl font-bold text-indigo-600 mt-1">{kpi.value}</p>
+            <p className="text-2xl font-bold text-amber-500 mt-1">{kpi.value}</p>
           </div>
         ))}
       </div>
@@ -126,7 +126,7 @@ function AnalyticsPanel() {
               <XAxis dataKey="_id" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
               <Tooltip formatter={(v) => [`$${v}`, 'Revenue']} />
-              <Line type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="revenue" stroke="#f59e0b" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -161,7 +161,7 @@ function AnalyticsPanel() {
                 <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={90} />
                 <Tooltip formatter={(v) => [`$${v}`, 'Revenue']} />
-                <Bar dataKey="revenue" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="revenue" fill="#f59e0b" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -175,7 +175,7 @@ function AnalyticsPanel() {
           <button
             onClick={handleInsights}
             disabled={insightsLoading}
-            className="px-4 py-1.5 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 disabled:opacity-50"
+            className="px-4 py-1.5 bg-amber-500 text-white text-sm rounded hover:bg-amber-400 disabled:opacity-50"
           >
             {insightsLoading ? 'Generating...' : 'Generate AI Insights'}
           </button>
@@ -296,7 +296,7 @@ function AIToolsPanel() {
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-xs md:max-w-md px-3 py-2 text-sm ${
                 m.role === 'user'
-                  ? 'bg-indigo-100 text-indigo-900 rounded-l-xl rounded-tr-xl'
+                  ? 'bg-amber-50 text-amber-900 rounded-l-xl rounded-tr-xl'
                   : 'bg-gray-100 text-gray-800 rounded-r-xl rounded-tl-xl'
               }`}>
                 {m.content}
@@ -319,12 +319,12 @@ function AIToolsPanel() {
             onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
             placeholder="Ask about your store..."
             disabled={chatLoading}
-            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50"
+            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-50"
           />
           <button
             onClick={handleChatSend}
             disabled={chatLoading || !chatInput.trim()}
-            className="px-4 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 disabled:opacity-50"
+            className="px-4 py-2 bg-amber-500 text-white text-sm rounded hover:bg-amber-400 disabled:opacity-50"
           >
             Send
           </button>
@@ -342,19 +342,19 @@ function AIToolsPanel() {
             value={descName}
             onChange={(e) => setDescName(e.target.value)}
             placeholder="Product name (e.g. Wireless Headphones)"
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
           <textarea
             value={descFeatures}
             onChange={(e) => setDescFeatures(e.target.value)}
             placeholder="Key features (e.g. noise cancelling, 30hr battery, USB-C charging)"
             rows={2}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
           />
           <button
             onClick={handleDescGenerate}
             disabled={descLoading || !descName.trim()}
-            className="px-4 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 disabled:opacity-50"
+            className="px-4 py-2 bg-amber-500 text-white text-sm rounded hover:bg-amber-400 disabled:opacity-50"
           >
             {descLoading ? 'Generating...' : 'Generate Description'}
           </button>
@@ -363,14 +363,14 @@ function AIToolsPanel() {
               <div className="border border-gray-200 rounded p-3">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-semibold text-gray-500 uppercase">SEO Description</span>
-                  <button onClick={() => copyToClipboard(descResult.description)} className="text-xs text-indigo-600 hover:underline">Copy</button>
+                  <button onClick={() => copyToClipboard(descResult.description)} className="text-xs text-amber-500 hover:underline">Copy</button>
                 </div>
                 <p className="text-sm text-gray-700">{descResult.description}</p>
               </div>
               <div className="border border-gray-200 rounded p-3">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-semibold text-gray-500 uppercase">Marketing Summary</span>
-                  <button onClick={() => copyToClipboard(descResult.summary)} className="text-xs text-indigo-600 hover:underline">Copy</button>
+                  <button onClick={() => copyToClipboard(descResult.summary)} className="text-xs text-amber-500 hover:underline">Copy</button>
                 </div>
                 <p className="text-sm text-gray-700">{descResult.summary}</p>
               </div>
@@ -395,7 +395,7 @@ function AIToolsPanel() {
           <button
             onClick={handleInvoiceAnalyze}
             disabled={invoiceLoading || !invoiceFile}
-            className="px-4 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 disabled:opacity-50"
+            className="px-4 py-2 bg-amber-500 text-white text-sm rounded hover:bg-amber-400 disabled:opacity-50"
           >
             {invoiceLoading ? 'Extracting text...' : 'Analyze Invoice'}
           </button>
@@ -425,7 +425,7 @@ function AIToolsPanel() {
               {invoiceResult.summary.categories?.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {invoiceResult.summary.categories.map((cat, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full">{cat}</span>
+                    <span key={i} className="px-2 py-0.5 bg-amber-50 text-amber-700 text-xs rounded-full">{cat}</span>
                   ))}
                 </div>
               )}
@@ -536,15 +536,22 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-zinc-100 overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-56 bg-indigo-700 text-white flex flex-col shrink-0">
-        <div className="p-4 font-bold text-lg border-b border-indigo-600">SwiftCard Admin</div>
+      <aside className="w-56 bg-zinc-900 text-white flex flex-col shrink-0">
+        <div className="p-4 border-b border-zinc-800 flex items-center gap-2">
+          <div className="w-6 h-6 bg-amber-500 rounded flex items-center justify-center shrink-0">
+            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 6h13M7 13L5.4 5" />
+            </svg>
+          </div>
+          <span className="font-bold text-sm">Admin Panel</span>
+        </div>
         <nav className="flex-1 p-3 space-y-1">
-          <p className="text-xs text-indigo-300 uppercase tracking-wider px-2 pt-3 pb-1">Manage</p>
+          <p className="text-xs text-zinc-600 uppercase tracking-wider px-3 pt-3 pb-1">Manage</p>
           <SidebarItem label="Products" section="products" activeSection={activeSection} setActiveSection={setActiveSection} />
           <SidebarItem label="Orders" section="orders" activeSection={activeSection} setActiveSection={setActiveSection} />
-          <p className="text-xs text-indigo-300 uppercase tracking-wider px-2 pt-3 pb-1">Intelligence</p>
+          <p className="text-xs text-zinc-600 uppercase tracking-wider px-3 pt-3 pb-1">Intelligence</p>
           <SidebarItem label="Analytics" section="analytics" activeSection={activeSection} setActiveSection={setActiveSection} />
           <SidebarItem label="AI Tools" section="aitools" activeSection={activeSection} setActiveSection={setActiveSection} />
         </nav>
@@ -593,7 +600,7 @@ export default function AdminPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                    className="px-5 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-400 disabled:opacity-50 transition-colors"
                   >
                     {saving ? 'Saving…' : editingId ? 'Update Product' : 'Add Product'}
                   </button>
@@ -635,7 +642,7 @@ export default function AdminPage() {
                       {products.map(p => (
                         <tr
                           key={p._id}
-                          className={`hover:bg-gray-50 transition-colors ${editingId === p._id ? 'bg-indigo-50' : ''}`}
+                          className={`hover:bg-zinc-50 transition-colors ${editingId === p._id ? 'bg-amber-50' : ''}`}
                         >
                           <td className="px-4 py-3 font-medium text-gray-800 max-w-[180px] truncate">{p.name}</td>
                           <td className="px-4 py-3 text-gray-500">{p.category}</td>
@@ -645,7 +652,7 @@ export default function AdminPage() {
                             <div className="flex gap-3">
                               <button
                                 onClick={() => handleEdit(p)}
-                                className="text-xs font-medium text-indigo-600 hover:underline"
+                                className="text-xs font-medium text-amber-500 hover:underline"
                               >
                                 Edit
                               </button>
@@ -709,7 +716,7 @@ export default function AdminPage() {
                             value={o.status}
                             onChange={e => handleStatusChange(o._id, e.target.value)}
                             disabled={updatingOrder === o._id}
-                            className={`text-xs font-semibold rounded-full px-3 py-1 border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 disabled:opacity-50 ${STATUS_STYLES[o.status] ?? 'bg-gray-100 text-gray-600'}`}
+                            className={`text-xs font-semibold rounded-full px-3 py-1 border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-amber-500 disabled:opacity-50 ${STATUS_STYLES[o.status] ?? 'bg-zinc-100 text-zinc-600'}`}
                           >
                             {ORDER_STATUSES.map(s => (
                               <option key={s} value={s} className="bg-white text-gray-700 font-normal">

@@ -5,21 +5,21 @@ import { useCart } from '../context/CartContext'
 
 function SkeletonDetail() {
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse">
-      <div className="h-4 bg-gray-200 rounded w-48 mb-8" />
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-pulse">
+      <div className="h-4 bg-zinc-200 rounded w-48 mb-8" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
-        <div className="bg-gray-200 rounded-xl aspect-square" />
+        <div className="bg-zinc-200 rounded-xl aspect-square" />
         <div className="flex flex-col gap-4">
-          <div className="h-3 bg-gray-200 rounded w-24" />
-          <div className="h-8 bg-gray-200 rounded w-3/4" />
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
+          <div className="h-3 bg-zinc-200 rounded w-24" />
+          <div className="h-8 bg-zinc-200 rounded w-3/4" />
+          <div className="h-8 bg-zinc-200 rounded w-1/3" />
           <div className="space-y-2 mt-2">
-            <div className="h-4 bg-gray-200 rounded" />
-            <div className="h-4 bg-gray-200 rounded" />
-            <div className="h-4 bg-gray-200 rounded w-4/5" />
+            <div className="h-4 bg-zinc-200 rounded" />
+            <div className="h-4 bg-zinc-200 rounded" />
+            <div className="h-4 bg-zinc-200 rounded w-4/5" />
           </div>
-          <div className="h-5 bg-gray-200 rounded w-32 mt-2" />
-          <div className="h-12 bg-gray-200 rounded-xl mt-4" />
+          <div className="h-5 bg-zinc-200 rounded w-32 mt-2" />
+          <div className="h-12 bg-zinc-200 rounded-xl mt-4" />
         </div>
       </div>
     </main>
@@ -76,20 +76,20 @@ export default function ProductDetailPage() {
   const lowStock = !outOfStock && product.stock <= 5
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-8 flex-wrap">
-        <Link to="/" className="hover:text-indigo-600 transition-colors">Home</Link>
+      <nav className="flex items-center gap-1.5 text-sm text-zinc-400 mb-8 flex-wrap">
+        <Link to="/" className="hover:text-amber-600 transition-colors">Shop</Link>
         <span>/</span>
         <button
           onClick={() => navigate('/?category=' + encodeURIComponent(product.category))}
-          className="hover:text-indigo-600 transition-colors"
+          className="hover:text-amber-600 transition-colors"
         >
           {product.category}
         </button>
         <span>/</span>
-        <span className="text-gray-600 font-medium truncate max-w-[200px] sm:max-w-xs">
+        <span className="text-zinc-600 font-medium truncate max-w-[200px] sm:max-w-xs">
           {product.name}
         </span>
       </nav>
@@ -97,7 +97,7 @@ export default function ProductDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
 
         {/* Product image */}
-        <div className="rounded-xl overflow-hidden bg-gray-100 aspect-square shadow-sm">
+        <div className="rounded-xl overflow-hidden bg-zinc-100 aspect-square">
           <img
             src={product.imageUrl}
             alt={product.name}
@@ -107,29 +107,29 @@ export default function ProductDetailPage() {
 
         {/* Product info */}
         <div className="flex flex-col">
-          <span className="text-xs font-semibold text-indigo-500 uppercase tracking-wider mb-2">
+          <span className="text-[11px] font-semibold text-amber-600 uppercase tracking-wider mb-2">
             {product.category}
           </span>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight mb-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 leading-tight mb-4">
             {product.name}
           </h1>
 
-          <p className="text-3xl font-bold text-gray-900 mb-6">
+          <p className="text-4xl font-bold text-zinc-900 mb-6 tracking-tight">
             ${product.price.toFixed(2)}
           </p>
 
-          <p className="text-gray-600 leading-relaxed mb-8">
+          <p className="text-zinc-600 leading-relaxed mb-8 text-sm">
             {product.description}
           </p>
 
           {/* Stock indicator */}
           <div className="flex items-center gap-2 mb-8">
             <span className={`w-2 h-2 rounded-full shrink-0 ${
-              outOfStock ? 'bg-red-500' : lowStock ? 'bg-amber-400' : 'bg-green-500'
+              outOfStock ? 'bg-red-500' : lowStock ? 'bg-amber-400' : 'bg-emerald-500'
             }`} />
             <span className={`text-sm font-medium ${
-              outOfStock ? 'text-red-600' : lowStock ? 'text-amber-600' : 'text-green-600'
+              outOfStock ? 'text-red-600' : lowStock ? 'text-amber-600' : 'text-emerald-600'
             }`}>
               {outOfStock
                 ? 'Out of stock'
@@ -143,12 +143,12 @@ export default function ProductDetailPage() {
           <button
             onClick={handleAddToCart}
             disabled={outOfStock}
-            className={`w-full py-3 rounded-xl font-semibold text-base transition-all duration-200 ${
+            className={`w-full py-3.5 rounded-xl font-semibold text-base transition-all duration-200 ${
               outOfStock
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
                 : added
-                ? 'bg-green-600 text-white scale-[0.98]'
-                : 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]'
+                ? 'bg-emerald-600 text-white scale-[0.99]'
+                : 'bg-amber-500 text-white hover:bg-amber-400 active:scale-[0.99]'
             }`}
           >
             {outOfStock ? 'Out of Stock' : added ? '✓ Added to Cart' : 'Add to Cart'}
@@ -157,7 +157,7 @@ export default function ProductDetailPage() {
           {added && (
             <Link
               to="/cart"
-              className="mt-3 text-center text-sm text-indigo-600 hover:underline"
+              className="mt-3 text-center text-sm text-amber-600 hover:text-amber-500 transition-colors"
             >
               View cart →
             </Link>
